@@ -1,0 +1,133 @@
+import numpy as np
+import pandas as pd
+
+class FinMaster:
+    def __init__(self, age, income, income_growth_rate, risk_tolerance, financial_goal, years_to_goal):
+        self.age = age
+        self.income = income
+        self.income_growth_rate = income_growth_rate
+        self.risk_tolerance = risk_tolerance
+        self.financial_goal = financial_goal
+        self.years_to_goal = years_to_goal
+
+    def calculate_asset_allocation(self):
+        """
+        Applies Rule of 100 strategy to calculate the percentage of stocks in the portfolio based on the user's age.
+        """
+        stock_percentage = max(0, 100 - self.age)  # 100 - age for stock allocation
+        bond_percentage = 100 - stock_percentage  # The rest is allocated to safer bonds
+        return stock_percentage, bond_percentage
+    
+    def projected_income(self):
+        """
+        Calculates projected income over the years to financial goal.
+        """
+        projected_income = self.income * (1 + self.income_growth_rate) ** self.years_to_goal
+        return projected_income
+
+    def risk_adjusted_allocation(self):
+        """
+        Adjusts the asset allocation based on risk tolerance.
+        """
+        stock_percentage, bond_percentage = self.calculate_asset_allocation()
+
+        # Adjust stock and bond allocation based on risk tolerance
+        if self.risk_tolerance == 'high':
+            stock_percentage += 10
+            bond_percentage -= 10
+        elif self.risk_tolerance == 'low':
+            stock_percentage -= 10
+            bond_percentage += 10
+        
+        # Ensure percentages don't go below 0 or above 100
+        stock_percentage = max(0, min(100, stock_percentage))
+        bond_percentage = 100 - stock_percentage
+
+        return stock_percentage, bond_percentage
+
+    def diversified_investment_plan(self):
+        """
+        Provides a diversified investment plan including stocks, bonds, gold, and real estate.
+        """
+        stock_percentage, bond_percentage = self.risk_adjusted_allocation()
+
+        # Allocation to gold and real estate (10% each, adjusted by risk)
+        gold_percentage = 10
+        real_estate_percentage = 10
+
+        # Adjust based on risk
+        if self.risk_tolerance == 'high':
+            gold_percentage += 5
+            real_estate_percentage += 5
+        elif self.risk_tolerance == 'low':
+            gold_percentage -= 5
+            real_estate_percentage -= 5
+
+        total_allocation = stock_percentage + bond_percentage + gold_percentage + real_estate_percentage
+
+        # Normalize if total allocation exceeds 100
+        if total_allocation > 100:
+            excess = total_allocation - 100
+            stock_percentage -= excess * (stock_percentage / total_allocation)
+            bond_percentage -= excess * (bond_percentage / total_allocation)
+            gold_percentage -= excess * (gold_percentage / total_allocation)
+            real_estate_percentage -= excess * (real_estate_percentage / total_allocation)
+
+        return stock_percentage, bond_percentage, gold_percentage, real_estate_percentage
+
+    def investment_growth_projection(self, stock_return, bond_return, gold_return, real_estate_return):
+        """
+        Projects the growth of the investment portfolio based on the individual asset returns.
+        """
+        stock_percentage, bond_percentage, gold_percentage, real_estate_percentage = self.diversified_investment_plan()
+
+        # Project the portfolio value after the specified years
+        projected_stock_value = self.financial_goal * (stock_percentage / 100) * (1 + stock_return) ** self.years_to_goal
+        projected_bond_value = self.financial_goal * (bond_percentage / 100) * (1 + bond_return) ** self.years_to_goal
+        projected_gold_value = self.financial_goal * (gold_percentage / 100) * (1 + gold_return) ** self.years_to_goal
+        projected_real_estate_value = self.financial_goal * (real_estate_percentage / 100) * (1 + real_estate_return) ** self.years_to_goal
+
+        total_projected_value = projected_stock_value + projected_bond_value + projected_gold_value + projected_real_estate_value
+
+        return total_projected_value
+
+    def display_investment_plan(self):
+        """
+        Displays a detailed investment plan.
+        """
+        stock_percentage, bond_percentage, gold_percentage, real_estate_percentage = self.diversified_investment_plan()
+
+        print("------ FINMASTER Investment Plan ------")
+        print(f"Age: {self.age} | Income: ${self.income} | Financial Goal: ${self.financial_goal}")
+        print(f"Years to Goal: {self.years_to_goal} | Risk Tolerance: {self.risk_tolerance}")
+        print("Asset Allocation:")
+        print(f"Stocks: {stock_percentage:.2f}%")
+        print(f"Bonds: {bond_percentage:.2f}%")
+        print(f"Gold: {gold_percentage:.2f}%")
+        print(f"Real Estate: {real_estate_percentage:.2f}%")
+        
+        # Show projected growth based on average returns
+        projected_value = self.investment_growth_projection(stock_return=0.07, bond_return=0.03, gold_return=0.05, real_estate_return=0.06)
+        print(f"Projected Portfolio Value after {self.years_to_goal} years: ${projected_value:,.2f}")
+
+
+def get_user_input():
+    # Get user inputs
+    age = int(input("Enter your age: "))
+    income = float(input("Enter your current income: $"))
+    income_growth_rate = float(input("Enter your annual income increment rate (e.g., 0.05 for 5%): "))
+    risk_tolerance = input("Enter your risk tolerance (high/medium/low): ").lower()
+    financial_goal = float(input("Enter your financial goal amount (e.g., $1000000): $"))
+    years_to_goal = int(input("Enter the number of years to achieve your goal: "))
+
+    return age, income, income_growth_rate, risk_tolerance, financial_goal, years_to_goal
+
+
+# Get user input
+age, income, income_growth_rate, risk_tolerance, financial_goal, years_to_goal = get_user_input()
+
+# Initialize the FinMaster class with user input
+user_plan = FinMaster(age, income, income_growth_rate, risk_tolerance, financial_goal, years_to_goal)
+
+# Display the investment plan
+user_plan.display_investment_plan()
